@@ -11,6 +11,8 @@ class State {
   void SetStateVector(const Eigen::VectorXd& state_vector) { _state_vector = state_vector; }
   void SetCovarianceMatrix(const Eigen::MatrixXd& covariance_matrix) { _covariance_matrix = covariance_matrix; }
 
+  int GetStateSize() const { return _state_vector.size(); }
+
  private:
   Eigen::VectorXd _state_vector;
   Eigen::MatrixXd _covariance_matrix;
