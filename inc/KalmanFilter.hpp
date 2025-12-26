@@ -1,0 +1,12 @@
+#include "State.hpp"
+
+class KalmanFilter {
+ public:
+  KalmanFilter() = default;
+  ~KalmanFilter() = default;
+
+  State TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, const State& state, double dt);
+  State MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd R, const State& state, const Eigen::VectorXd& measurement);
+
+ private:
+};
