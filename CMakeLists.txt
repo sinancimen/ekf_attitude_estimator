@@ -4,7 +4,9 @@ project(my-project)
 find_package(Eigen3 CONFIG REQUIRED)
 
 add_executable(ekf-attitude-estimator    
-    src/main.cpp)
+    src/main.cpp
+    src/KalmanFilter.cpp
+    src/Quaternion.cpp)
     
 target_include_directories(ekf-attitude-estimator
     PRIVATE 
