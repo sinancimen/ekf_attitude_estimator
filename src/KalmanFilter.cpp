@@ -1,3 +1,5 @@
+// Written by Sinan Çimen, 2025. https://github.com/sinancimen
+
 #include "KalmanFilter.hpp"
 
 State KalmanFilter::TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, const Eigen::MatrixXd G, const State& prev_state, double dt) {
