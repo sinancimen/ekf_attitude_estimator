@@ -20,3 +20,16 @@ State KalmanFilter::MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::Matr
     updated_state.SetCovarianceMatrix((Eigen::MatrixXd::Identity(prev_state.GetStateSize(), prev_state.GetStateSize()) - K_k * H) * prev_state.GetCovarianceMatrix());
     return updated_state;
 }
+
+State KalmanFilter::ProcessGyro(const Eigen::Vector3d& gyro_measurement, double dt, const State& prev_state) {
+    Eigen::MatrixXd F = _process_model->GetStateTransitionMatrix(gyro_measurement);
+    Eigen::MatrixXd Q = _process_model->GetProcessNoiseCovarince();
+    Eigen::MatrixXd G = _process_model->GetProcessNoiseInputMatrix();
+    return TimeUpdate(F, Q, G, prev_state, dt);
+}
+
+State KalmanFilter::ProcessMeasurement(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, Eigen::Matrix3d attMatrix, const State& prev_state, const Eigen::VectorXd& measurement) {
+    Eigen::MatrixXd H = _measurement_model->GetMeasurementMatrix(ref_vecs, attMatrix);
+    Eigen::MatrixXd R = _measurement_model->GetMeasurementNoiseCovariance(ref_vecs, attMatrix);
+    return MeasurementUpdate(H, R, prev_state, measurement);
+}

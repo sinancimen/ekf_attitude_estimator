@@ -1,10 +1,15 @@
 // Written by Sinan Çimen, 2025. https://github.com/sinancimen
 
+#pragma once
+
 #include <Eigen/Dense>
 
 class Quaternion {
 public:
-    Quaternion() = default;
+    Quaternion() {
+        _q << 0.0, 0.0, 0.0, 1.0; // Initialize as unit quaternion
+    };
+    Quaternion(const Eigen::Vector4d& q) : _q(q) {}
     ~Quaternion() = default;
 
     Eigen::Vector4d GetQuaternion() const { return _q; }
