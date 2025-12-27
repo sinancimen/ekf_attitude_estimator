@@ -11,12 +11,12 @@ public:
         : _process_model(process_model),
         _measurement_model(measurement_model) {}
     ~KalmanFilter() = default;
-    State ProcessGyro(const Eigen::Vector3d& gyro_measurement, double dt, const State& prev_state);
-    State ProcessMeasurement(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, Eigen::Matrix3d attMatrix, const State& prev_state, const Eigen::VectorXd& measurement);
+    void ProcessGyro(const Eigen::Vector3d& gyro_measurement, double dt, State* error_state, State* full_state);
+    void ProcessMeasurement(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, Eigen::Matrix3d attMatrix, State* error_state, const Eigen::MatrixXd& measurement);
 
 private:
     ProcessModel* _process_model;
     MeasurementModel* _measurement_model;
-    State TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, const Eigen::MatrixXd G, const State& state, double dt);
-    State MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd R, const State& state, const Eigen::VectorXd& measurement);
+    void TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, const Eigen::MatrixXd G, State* error_state, State* full_state, Eigen::Vector3d rate_meas, double dt);
+    void MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd R, State* error_state, const Eigen::MatrixXd& measurement);
 };

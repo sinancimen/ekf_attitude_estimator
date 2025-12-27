@@ -16,3 +16,6 @@ target_include_directories(ekf-attitude-estimator
 target_link_libraries(ekf-attitude-estimator 
     PRIVATE 
         Eigen3::Eigen)
+
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")

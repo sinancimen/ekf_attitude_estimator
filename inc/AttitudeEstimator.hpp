@@ -15,11 +15,11 @@ public:
     Quaternion GetQuaternion() const;
     Eigen::Vector3d GetGyroBias() const;
     void TimeUpdate(const Eigen::Vector3d& gyro_measurement, double dt);
-    void MeasurementUpdate(const Quaternion& quat_measurement);
+    void MeasurementUpdate(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, const Eigen::VectorXd& measurement);
     Eigen::MatrixXd GetCovarianceMatrix() const;
 
 private:
-
+    void ResetErrorState();
     KalmanFilter _kalman_filter;
     State _full_state;
     State _error_state;
