@@ -5,11 +5,13 @@
 #include <random>
 #include <vector>
 #include <cmath>
+#include <iomanip>
 #include "AttitudeEstimator.hpp"
 #include "GyroProcessModel.hpp"
 #include "QuestMeasurementModel.hpp"
 
 int main() {
+    std::cout << "a" << std::endl;
     MeasurementModel* measurement_model = new QuestMeasurementModel();
     ProcessModel* process_model = new GyroProcessModel();
     
@@ -39,6 +41,7 @@ int main() {
 
     // --------- initial guesses ---------
     Quaternion q_hat(Eigen::Vector4d(0.0, 0.05, 0.0, 1.0)); // initial true quaternion
+    q_hat.Normalize();
     Eigen::Vector3d beta_hat(0.0, 0.0, 0.0); // initial bias estimate
 
     // --------- inertial star reference directions ---------
@@ -56,7 +59,9 @@ int main() {
     P.block<3,3>(0,0) = (sigma_att0 * sigma_att0) * Eigen::Matrix3d::Identity();
     P.block<3,3>(3,3) = (sigma_bias0 * sigma_bias0) * Eigen::Matrix3d::Identity();
 
-    AttitudeEstimator estimator(Eigen::VectorXd::Zero(6), P, process_model, measurement_model);
+    Eigen::VectorXd initial_state(7);
+    initial_state << q_hat.GetQuaternion(), beta_hat;
+    AttitudeEstimator estimator(initial_state, P, process_model, measurement_model);
 
         for (int k = 0; k < Nsteps; ++k)
     {
@@ -111,6 +116,11 @@ int main() {
             std::cout << t << "  " << att_err << "  " << bias_err << "\n";
         }*/
     }
+
+    std::cout << "Quat True: " << std::setprecision(15) << q_true.GetQuaternion().transpose() << std::endl;
+    std::cout << "Quat Est: " << std::setprecision(15) << estimator.GetQuaternion().GetQuaternion().transpose() << std::endl;
+    std::cout << "Gyro Bias True: " << std::setprecision(15) << beta_true.transpose() << std::endl;
+    std::cout << "Gyro Bias Est: " << std::setprecision(15) << estimator.GetGyroBias().transpose() << std::endl;
 
     return 0;
 }

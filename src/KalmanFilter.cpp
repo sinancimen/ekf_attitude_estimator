@@ -16,11 +16,13 @@ void KalmanFilter::TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, 
     error_state->SetCovarianceMatrix(stateTransition * error_state->GetCovarianceMatrix() * stateTransition.transpose() + G*Q*G.transpose()*dt);
 }
 
-void KalmanFilter::MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd R, State* error_state, const Eigen::MatrixXd& measurement)
+void KalmanFilter::MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd expected_y, const Eigen::MatrixXd R, State* error_state, const Eigen::MatrixXd& measurement)
 {
     Eigen::MatrixXd K_k = error_state->GetCovarianceMatrix() * H.transpose() *
                              (H * error_state->GetCovarianceMatrix() * H.transpose() + R).inverse();
-    error_state->SetStateVector(error_state->GetStateVector() + K_k * (measurement - H * error_state->GetStateVector()));
+    Eigen::MatrixXd measurement_vec = measurement.reshaped(Eigen::Index(measurement.rows()*measurement.cols()), 1);
+    Eigen::MatrixXd expected_y_vec = expected_y.reshaped(Eigen::Index(expected_y.rows()*expected_y.cols()), 1);
+    error_state->SetStateVector(error_state->GetStateVector() + K_k * (measurement_vec - expected_y_vec));
     error_state->SetCovarianceMatrix((Eigen::MatrixXd::Identity(error_state->GetStateSize(), error_state->GetStateSize()) - K_k * H) * error_state->GetCovarianceMatrix());
 }
 
@@ -34,5 +36,6 @@ void KalmanFilter::ProcessGyro(const Eigen::Vector3d& gyro_measurement, double d
 void KalmanFilter::ProcessMeasurement(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, Eigen::Matrix3d attMatrix, State* error_state, const Eigen::MatrixXd& measurement) {
     Eigen::MatrixXd H = _measurement_model->GetMeasurementMatrix(ref_vecs, attMatrix);
     Eigen::MatrixXd R = _measurement_model->GetMeasurementNoiseCovariance(ref_vecs, attMatrix);
-    MeasurementUpdate(H, R, error_state, measurement);
+    Eigen::MatrixXd expected_y = attMatrix * ref_vecs.transpose();
+    MeasurementUpdate(H, expected_y, R, error_state, measurement);
 }

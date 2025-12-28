@@ -17,7 +17,7 @@ void AttitudeEstimator::TimeUpdate(const Eigen::Vector3d& gyro_measurement, doub
     _kalman_filter.ProcessGyro(gyro_measurement, dt, &_error_state, &_full_state);
 }
 
-void AttitudeEstimator::MeasurementUpdate(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, const Eigen::VectorXd& measurement) {
+void AttitudeEstimator::MeasurementUpdate(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, const Eigen::MatrixXd& measurement) {
     Eigen::Matrix3d attMatrix = GetQuaternion().GetRotationMatrix();
     _kalman_filter.ProcessMeasurement(ref_vecs, attMatrix, &_error_state, measurement);
     ResetErrorState();

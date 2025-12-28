@@ -18,5 +18,5 @@ private:
     ProcessModel* _process_model;
     MeasurementModel* _measurement_model;
     void TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, const Eigen::MatrixXd G, State* error_state, State* full_state, Eigen::Vector3d rate_meas, double dt);
-    void MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd R, State* error_state, const Eigen::MatrixXd& measurement);
+    void MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd expected_y, const Eigen::MatrixXd R, State* error_state, const Eigen::MatrixXd& measurement);
 };
