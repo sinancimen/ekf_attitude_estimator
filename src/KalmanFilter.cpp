@@ -18,11 +18,22 @@ void KalmanFilter::TimeUpdate(const Eigen::MatrixXd F, const Eigen::MatrixXd Q, 
 
 void KalmanFilter::MeasurementUpdate(const Eigen::MatrixXd H, const Eigen::MatrixXd expected_y, const Eigen::MatrixXd R, State* error_state, const Eigen::MatrixXd& measurement)
 {
-    Eigen::MatrixXd K_k = error_state->GetCovarianceMatrix() * H.transpose() *
-                             (H * error_state->GetCovarianceMatrix() * H.transpose() + R).inverse();
-    Eigen::MatrixXd measurement_vec = measurement.reshaped(Eigen::Index(measurement.rows()*measurement.cols()), 1);
-    Eigen::MatrixXd expected_y_vec = expected_y.reshaped(Eigen::Index(expected_y.rows()*expected_y.cols()), 1);
-    error_state->SetStateVector(error_state->GetStateVector() + K_k * (measurement_vec - expected_y_vec));
+    // Stack measurements as [x0;y0;z0;x1;y1;z1;...]
+    const int num_vectors = measurement.rows();
+    Eigen::MatrixXd measurement_vec(num_vectors * 3, 1);
+    for (int i = 0; i < num_vectors; ++i) {
+        measurement_vec.block<3,1>(i*3, 0) = measurement.row(i).transpose();
+    }
+    // Stack expected measurements from expected_y (3 x N) in the same order
+    Eigen::MatrixXd expected_y_vec(num_vectors * 3, 1);
+    for (int i = 0; i < num_vectors; ++i) {
+        expected_y_vec.block<3,1>(i*3, 0) = expected_y.col(i);
+    }
+
+    Eigen::MatrixXd S = H * error_state->GetCovarianceMatrix() * H.transpose() + R;
+    Eigen::MatrixXd K_k = error_state->GetCovarianceMatrix() * H.transpose() * S.inverse();
+    Eigen::MatrixXd innov = measurement_vec - expected_y_vec;
+    error_state->SetStateVector(error_state->GetStateVector() + K_k * innov);
     error_state->SetCovarianceMatrix((Eigen::MatrixXd::Identity(error_state->GetStateSize(), error_state->GetStateSize()) - K_k * H) * error_state->GetCovarianceMatrix());
 }
 
