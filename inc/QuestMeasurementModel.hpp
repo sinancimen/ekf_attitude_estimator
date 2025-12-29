@@ -23,15 +23,13 @@ public:
 
         return H;
     }
-    virtual Eigen::MatrixXd GetMeasurementNoiseCovariance(Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, Eigen::Matrix3d attMatrix) const {
+    virtual Eigen::MatrixXd GetMeasurementNoiseCovariance(Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs) const {
         int num_vectors = ref_vecs.rows();
-        double measurement_noise = 0.01; // Example measurement noise standard deviation
+        double measurement_noise = 0.1; // Example measurement noise standard deviation
         Eigen::MatrixXd R(num_vectors * 3, num_vectors * 3);
         R.setZero();
-        
         for (int i = 0; i < num_vectors; ++i) {
-            Eigen::Vector3d v_b = attMatrix * ref_vecs.row(i).transpose();
-            R.block<3,3>(i * 3, i * 3) = -measurement_noise * measurement_noise * (skew(v_b) * skew(v_b));
+            R.block<3,3>(i * 3, i * 3) = (measurement_noise * measurement_noise) * Eigen::Matrix3d::Identity();
         }
 
         return R;

@@ -4,8 +4,12 @@
 
 void Quaternion::Normalize() {
     double norm = _q.norm();
-    if (norm > 0) {
+    const double tol = 1e-9;
+    if (norm > tol) {
         _q /= norm;
+    } else {
+        // If the quaternion norm is extremely small, reset to identity to avoid NaNs
+        _q << 0.0, 0.0, 0.0, 1.0;
     }
 }
 

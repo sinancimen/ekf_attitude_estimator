@@ -35,7 +35,7 @@ void KalmanFilter::ProcessGyro(const Eigen::Vector3d& gyro_measurement, double d
 
 void KalmanFilter::ProcessMeasurement(const Eigen::Matrix<double, Eigen::Dynamic, 3> ref_vecs, Eigen::Matrix3d attMatrix, State* error_state, const Eigen::MatrixXd& measurement) {
     Eigen::MatrixXd H = _measurement_model->GetMeasurementMatrix(ref_vecs, attMatrix);
-    Eigen::MatrixXd R = _measurement_model->GetMeasurementNoiseCovariance(ref_vecs, attMatrix);
+    Eigen::MatrixXd R = _measurement_model->GetMeasurementNoiseCovariance(ref_vecs);
     Eigen::MatrixXd expected_y = attMatrix * ref_vecs.transpose();
     MeasurementUpdate(H, expected_y, R, error_state, measurement);
 }

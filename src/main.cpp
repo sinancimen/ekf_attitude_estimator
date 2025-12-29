@@ -11,7 +11,6 @@
 #include "QuestMeasurementModel.hpp"
 
 int main() {
-    std::cout << "a" << std::endl;
     MeasurementModel* measurement_model = new QuestMeasurementModel();
     ProcessModel* process_model = new GyroProcessModel();
     
@@ -23,7 +22,7 @@ int main() {
     int star_update_stride = 20;  // star tracker at 5 Hz (every 20 steps)
     const int Nstars = 3;         // number of reference stars
 
-    // true angular velocity (body frame, rad/s)
+    // true initial angular velocity (body frame, rad/s)
     Eigen::Vector3d omega_true(0.0, 0.0, 0.5);
 
     // true constant gyro bias (rad/s)
@@ -66,15 +65,10 @@ int main() {
         for (int k = 0; k < Nsteps; ++k)
     {
         double t = k * dt;
-
         // ---------- TRUE STATE PROPAGATION ----------
-        // (bias constant here; you could add random walk with n_b_rw)
-
         propagate_quat(q_true, omega_true, dt);
 
         // ---------- SENSOR SIMULATION ----------
-
-        // gyro measurement
         Eigen::Vector3d gyro_meas = omega_true + beta_true;
         for (int i = 0; i < 3; ++i)
             gyro_meas[i] += n_g(rng);
@@ -86,11 +80,9 @@ int main() {
         if (k % star_update_stride == 0)
         {
             const int m = 3 * Nstars; // measurement dimension
-
             // true and measured star directions
             std::vector<Eigen::Vector3d> b_meas(Nstars);
             Eigen::Matrix3d A_true = q_true.GetRotationMatrix();
-
             for (int i = 0; i < Nstars; ++i)
             {
                 Eigen::Vector3d b_true = A_true * r_inertial[i];
@@ -100,27 +92,16 @@ int main() {
 
                 b_meas[i] = (b_true + noise).normalized();
             }
-
             Eigen::MatrixXd measurements(b_meas.size(), 3);
             for(int i = 0; i < measurements.rows(); ++i) measurements.row(i) = b_meas[i].transpose();
             Eigen::MatrixXd references(b_meas.size(), 3);
             for(int i = 0; i < references.rows(); ++i) references.row(i) = r_inertial[i].transpose();
             estimator.MeasurementUpdate(references,measurements);
         }
-
-        // ---------- LOG ERRORS ----------
-        /*if (k % 100 == 0) // every 1 second
-        {
-            double att_err = quat_error_deg(q_true, q_hat);
-            double bias_err = (beta_hat - beta_true).norm();
-            std::cout << t << "  " << att_err << "  " << bias_err << "\n";
-        }*/
     }
-
     std::cout << "Quat True: " << std::setprecision(15) << q_true.GetQuaternion().transpose() << std::endl;
     std::cout << "Quat Est: " << std::setprecision(15) << estimator.GetQuaternion().GetQuaternion().transpose() << std::endl;
     std::cout << "Gyro Bias True: " << std::setprecision(15) << beta_true.transpose() << std::endl;
     std::cout << "Gyro Bias Est: " << std::setprecision(15) << estimator.GetGyroBias().transpose() << std::endl;
-
     return 0;
 }

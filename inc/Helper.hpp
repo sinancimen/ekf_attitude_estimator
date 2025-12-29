@@ -22,7 +22,6 @@ inline void propagate_quat(Quaternion& q, const Eigen::Vector3d& w, double dt)
     dq.SetQuaternion(Eigen::Vector4d(half_dt_w.x(), half_dt_w.y(), half_dt_w.z(), 1.0));
     dq.Normalize();
 
-    // Use Eigen::Quaterniond for safe quaternion multiplication (avoid vector*vector)
     Eigen::Vector4d q_vec = q.GetQuaternion();
     Eigen::Vector4d dq_vec = dq.GetQuaternion();
     Eigen::Quaterniond q_e(q_vec(3), q_vec(0), q_vec(1), q_vec(2));
@@ -32,16 +31,4 @@ inline void propagate_quat(Quaternion& q, const Eigen::Vector3d& w, double dt)
     q_new_vec << q_new.x(), q_new.y(), q_new.z(), q_new.w();
     q.SetQuaternion(q_new_vec);
     q.Normalize();
-}
-
-// convert quaternion error to angle (deg)
-double quat_error_deg(const Eigen::Quaterniond& q_true,
-                      const Eigen::Quaterniond& q_hat)
-{
-    // error = q_hat^{-1} * q_true
-    Eigen::Quaterniond q_err = q_hat.conjugate() * q_true;
-    q_err.normalize();
-    double w = std::clamp(std::abs(q_err.w()),  -1.0, 1.0);
-    double angle_rad = 2.0 * std::acos(w);
-    return angle_rad * 180.0 / M_PI;
 }
